@@ -25,8 +25,20 @@ class EngramScope:
         created = OperationEvent(**payload.model_dump())
         return self.store.insert_event(created)
 
-    def events(self, limit: int = 100, provider: str | None = None) -> list[OperationEvent]:
+    def events(self, limit: int | None = 100, provider: str | None = None) -> list[OperationEvent]:
         return self.store.list_events(limit=limit, provider=provider)
+
+    def export_events(
+        self,
+        output: str | Path | None = None,
+        format: str = "jsonl",
+        provider: str | None = None,
+        limit: int | None = None,
+    ) -> str:
+        """Export operation events to JSONL formatted string or file."""
+        from .export import export_events
+
+        return export_events(self, output=output, format=format, provider=provider, limit=limit)
 
     def remember(self, memory: MemoryCreate | None = None, **kwargs) -> tuple[MemoryRecord, ConflictEvent | None]:
         """Reference write path used by the demo and by apps without a memory backend."""

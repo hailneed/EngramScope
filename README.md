@@ -95,6 +95,28 @@ for event in lens.events(provider="mem0"):
 
 You can also POST provider-neutral events directly to `/v1/events`, which makes it possible to instrument custom memory stacks without adopting the reference store.
 
+## Export events (JSONL)
+
+EngramScope events can be exported to JSONL for offline analysis, auditing, or dataset preparation:
+
+```bash
+# Export all events to a file
+engramscope export-events --db engramscope.db --output events.jsonl
+
+# Export filtered by provider to stdout or file
+engramscope export-events --provider mem0 --limit 100 --output mem0_events.jsonl
+```
+
+Or programmatically via the Python SDK:
+
+```python
+# Export to file
+lens.export_events("events.jsonl", provider="mem0")
+
+# Or obtain as a JSONL string
+jsonl_data = lens.export_events(provider="mem0")
+```
+
 ## What v0.1 includes
 
 - **Memory Inspector** — browse agent memories and status.

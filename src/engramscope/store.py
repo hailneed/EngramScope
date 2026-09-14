@@ -188,14 +188,16 @@ class SQLiteStore:
             )
         return event
 
-    def list_events(self, limit: int = 100, provider: str | None = None) -> list[OperationEvent]:
+    def list_events(self, limit: int | None = 100, provider: str | None = None) -> list[OperationEvent]:
         sql = "SELECT * FROM operation_events"
         params: list[object] = []
         if provider:
             sql += " WHERE provider = ?"
             params.append(provider)
-        sql += " ORDER BY created_at DESC LIMIT ?"
-        params.append(limit)
+        sql += " ORDER BY created_at DESC"
+        if limit is not None:
+            sql += " LIMIT ?"
+            params.append(limit)
         with self.connect() as conn:
             rows = conn.execute(sql, tuple(params)).fetchall()
         events: list[OperationEvent] = []
