@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EngramScope — Agent Memory DevTools</title>
+  <style>
+    :root { color-scheme: dark; --bg:#090b10; --panel:#11151d; --line:#252b38; --muted:#8c96a8; --text:#eef2f8; --accent:#9ee493; --warn:#ffca6a; }
+    * { box-sizing:border-box } body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    header { padding:28px 32px 18px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:end; }
+    h1 { margin:0; font-size:24px; } .tag { color:var(--accent); } .muted{color:var(--muted)}
+    main { display:grid; grid-template-columns:1fr 1.3fr; gap:18px; padding:22px 32px 40px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    .panel h2 { margin:0; padding:14px 16px; font-size:13px; border-bottom:1px solid var(--line); color:#cbd4e3; }
+    .content { padding:14px 16px; } input,button { font:inherit; border-radius:8px; border:1px solid var(--line); background:#0c1017; color:var(--text); padding:10px 12px; }
+    input{width:100%; margin-bottom:8px} button{cursor:pointer} button:hover{border-color:#566176}
+    .row { padding:11px 0; border-bottom:1px solid #1b202b; } .row:last-child{border:0}
+    .pill { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 7px; margin-right:6px; font-size:11px; color:#bac4d5; }
+    .active { color:var(--accent); } .historical{color:var(--warn)} .score{float:right;color:var(--accent)}
+    code{color:#d7e1f0} @media(max-width:850px){main{grid-template-columns:1fr;padding:16px}header{padding:20px 16px}}
+  </style>
+</head>
+<body>
+<header>
+  <div><h1>◉ EngramScope</h1><div class="muted">DevTools for AI agent memory</div></div>
+  <div class="tag">LIVE MEMORY INSPECTOR</div>
+</header>
+<main>
+  <section class="panel">
+    <h2>MEMORY WRITE</h2>
+    <div class="content">
+      <input id="key" value="project.database" placeholder="key" />
+      <input id="value" value="PostgreSQL" placeholder="value" />
+      <input id="source" value="conversation#1" placeholder="source / provenance" />
+      <button onclick="writeMemory()">Write memory</button>
+      <div id="writeResult" class="row muted">Waiting for a memory write…</div>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>RECALL TRACE</h2>
+    <div class="content">
+      <input id="query" value="what database does the project use?" placeholder="recall query" />
+      <button onclick="recall()">Run recall</button>
+      <div id="recallResult" class="muted">No recall yet.</div>
+    </div>
+  </section>
+  <section class="panel" style="grid-column:1/-1">
+    <h2>MEMORY TIMELINE</h2>
+    <div class="content" id="memories">Loading…</div>
+  </section>
+</main>
+<script>
+async function refresh(){
+ const r=await fetch('/v1/memories'); const data=await r.json();
+ document.getElementById('memories').innerHTML=data.length?data.map(m=>`<div class="row"><span class="pill ${m.status}">${m.status}</span><span class="pill">${m.memory_type}</span><b>${escapeHtml(m.key)}</b> = <code>${escapeHtml(m.value)}</code><span class="score">${Math.round(m.confidence*100)}%</span><div class="muted">source: ${escapeHtml(m.source||'unknown')} · ${new Date(m.created_at).toLocaleString()}</div></div>`).join(''):'No memories yet.';
+}
+async function writeMemory(){
+ const body={key:key.value,value:value.value,source:source.value,namespace:'default',memory_type:'semantic',confidence:0.95};
+ const r=await fetch('/v1/memories',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}); const data=await r.json();
+ document.getElementById('writeResult').innerHTML=data.conflict?`<span class="historical">CONFLICT DETECTED</span><br>${escapeHtml(data.conflict.previous.value)} → <span class="active">${escapeHtml(data.memory.value)}</span>`:`<span class="active">MEMORY STORED</span> · ${data.memory.id.slice(0,8)}`; refresh();
+}
+async function recall(){
+ const r=await fetch('/v1/recall?q='+encodeURIComponent(query.value)); const data=await r.json();
+ document.getElementById('recallResult').innerHTML=data.length?data.map(h=>`<div class="row"><span class="score">${h.score}</span><b>${escapeHtml(h.memory.key)}</b> = ${escapeHtml(h.memory.value)}<div class="muted">WHY: ${escapeHtml(h.reason)}</div></div>`).join(''):'No matching memory.';
+}
+function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));}
+refresh();
+</script>
+</body>
+</html>

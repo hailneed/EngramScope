@@ -158,3 +158,15 @@ Good first contributions:
 - add a benchmark scenario,
 - improve the dashboard,
 - improve conflict / temporal reasoning.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Philosophy
+
+**Memory should be observable, testable, and reversible.**
+
+If agent memory becomes part of application state, developers need to debug it with the same rigor as databases, APIs, and code.
+
+## License
+
+MIT
