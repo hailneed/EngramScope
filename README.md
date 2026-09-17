@@ -4,7 +4,7 @@
 
 > See what your agents remember, why they recall it, and when memory goes wrong.
 
-<p align="center"><img src="docs/AgentMemora-demo.gif" alt="AgentMemora demo — memory write, conflict detection, provider events, timeline, and recall trace" width="100%" /></p>
+<p align="center"><img src="docs/AgentMemora-preview.svg" alt="AgentMemora — memory conflict, provider events, timeline, and recall trace" width="100%" /></p>
 <p align="center"><strong>Write → Recall → Trace → Detect conflict → Explain</strong></p>
 
 AgentMemora gives AI-agent developers a local, framework-agnostic way to inspect **memory writes, recall traces, conflicts, timelines, latency, and provenance**. It sits beside memory systems such as Mem0, Graphiti, Cognee, LangMem, and Hindsight — it does not replace them.
