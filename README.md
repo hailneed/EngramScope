@@ -1,31 +1,19 @@
-# ◉ EngramScope
+# ◉ AgentMemora
 
 **Open-source DevTools for AI agent memory.**
 
-> See what your agents remember, why they remember it, and when memory goes wrong.
+> See what your agents remember, why they recall it, and when memory goes wrong.
 
-<p align="center">
-  <img src="docs/EngramScope-demo.gif" alt="EngramScope demo — memory write, conflict detection, timeline, and recall trace" width="100%" />
-</p>
+<p align="center"><img src="docs/AgentMemora-demo.gif" alt="AgentMemora demo — memory write, conflict detection, provider events, timeline, and recall trace" width="100%" /></p>
+<p align="center"><strong>Write → Recall → Trace → Detect conflict → Explain</strong></p>
 
-<p align="center"><strong>Write → Update → Detect conflict → Recall → Explain</strong></p>
+AgentMemora gives AI-agent developers a local, framework-agnostic way to inspect **memory writes, recall traces, conflicts, timelines, latency, and provenance**. It sits beside memory systems such as Mem0, Graphiti, Cognee, LangMem, and Hindsight — it does not replace them.
 
-EngramScope gives AI-agent developers a local, framework-agnostic way to inspect **memory writes, recall traces, conflicts, timelines, latency, and provenance**. It is designed to sit beside memory systems such as Mem0, Graphiti, Cognee, LangMem, and Hindsight — not replace them.
+**Memory is application state. It should be observable, testable, and debuggable.**
 
-**The core idea:** memory is application state. It should be observable, testable, and debuggable.
+## Why AgentMemora?
 
-## Why EngramScope?
-
-When an agent produces a wrong answer, the failure may be the model, prompt, RAG pipeline, tool output — or **bad memory**. Memory systems increasingly need the same observability that application code already gets from logs and traces.
-
-EngramScope makes questions like these inspectable:
-
-- What did the agent store?
-- Where did this memory come from?
-- Which memories were recalled for this response?
-- Why did this memory rank highly?
-- Did a new fact contradict an old one?
-- What did the agent believe last week vs. today?
+When an agent produces a wrong answer, the failure may be the model, prompt, RAG pipeline, tool output — or bad memory. AgentMemora makes memory behavior inspectable: what was stored, where it came from, what was recalled, why it ranked, when facts changed, and how external providers behaved.
 
 ## Quick start
 
@@ -33,19 +21,17 @@ EngramScope makes questions like these inspectable:
 python -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
-engramscope serve
+agentmemora serve
 ```
 
-Open `http://127.0.0.1:8765`.
-
-Then write `project.database = PostgreSQL` and update it to `project.database = MongoDB`. EngramScope detects the conflict, marks PostgreSQL as historical, creates a timeline, and shows why the active memory is recalled instead of silently overwriting context.
+Open `http://127.0.0.1:8765`. Write `project.database = PostgreSQL`, update it to `MongoDB`, then run recall. The dashboard shows the conflict, historical timeline, recall reason, and provider operation events.
 
 ## Python SDK
 
 ```python
-from engramscope import EngramScope
+from agentmemora import AgentMemora
 
-lens = EngramScope("engramscope.db")
+lens = AgentMemora("agentmemora.db")
 lens.remember(key="project.database", value="PostgreSQL", source="conversation#23", confidence=0.94)
 lens.remember(key="project.database", value="MongoDB", source="conversation#41")
 
@@ -55,72 +41,59 @@ for hit in lens.recall("what database does the project use?"):
 
 ## Observe existing memory systems
 
-EngramScope records provider-neutral operation events around existing memory systems. **Raw memory payloads and search queries are not persisted by default.** Enable payload capture only when you explicitly need it in a safe development environment.
+AgentMemora records provider-neutral operation events around existing memory systems. **Raw external-provider memory payloads and search queries are not persisted by default.** Payload capture is explicit opt-in for controlled development environments.
 
 ### Mem0
 
-Wrap an already configured Mem0 client:
-
 ```python
 from mem0 import MemoryClient
-from engramscope import EngramScope
-from engramscope.adapters import ObservedMem0
+from agentmemora import AgentMemora
+from agentmemora.adapters import ObservedMem0
 
-lens = EngramScope("engramscope.db")
+lens = AgentMemora("agentmemora.db")
 mem0 = ObservedMem0(MemoryClient(api_key="..."), lens)
 mem0.add([{"role": "user", "content": "I prefer VS Code"}], user_id="alice")
 mem0.search("preferred editor", user_id="alice")
 ```
 
-No Mem0 credentials yet? Run `python examples/mem0_reproducible.py` for a deterministic, credential-free demonstration of the same adapter path.
+No credentials needed for the demo: `python examples/mem0_reproducible.py`.
 
 ### LangGraph / LangMem
 
-LangMem's persistent memory tools use LangGraph's store interface. EngramScope can proxy that store so writes, searches and deletes emit observability events while the underlying store remains authoritative.
-
 ```python
 from langgraph.store.memory import InMemoryStore
-from engramscope import EngramScope
-from engramscope.adapters import ObservedLangGraphStore
+from agentmemora import AgentMemora
+from agentmemora.adapters import ObservedLangGraphStore
 
-lens = EngramScope("engramscope.db")
+lens = AgentMemora("agentmemora.db")
 store = ObservedLangGraphStore(InMemoryStore(), lens)
-
 store.put(("memories", "alice"), "pref-1", {"text": "I prefer dark mode"})
 store.search(("memories", "alice"), query="theme preference", limit=5)
 ```
 
-See `examples/langgraph_observed.py` for the runnable store example. The wrapper intentionally uses the BaseStore-style interface instead of coupling EngramScope to a specific LangMem agent implementation.
-
-You can also POST provider-neutral events directly to `/v1/events`, making it possible to instrument custom memory stacks without adopting the reference store.
+See `examples/langgraph_observed.py`. Custom stacks can POST provider-neutral events directly to `/v1/events`.
 
 ## What v0.1 includes
 
-- **Memory Inspector** — browse agent memories and status.
-- **Conflict Detection** — old facts become historical when the same key changes.
-- **Timeline** — inspect how a fact changed over time.
-- **Recall Trace** — see which memories were selected and the retrieval reason.
-- **Provenance** — attach source information to every memory.
-- **Provider-neutral Events API** — record writes/recalls from any memory backend.
-- **Mem0 Adapter** — capture write/recall operations and latency without changing your Mem0 setup.
-- **LangGraph Store Adapter** — observe store writes/searches/deletes used by LangGraph/LangMem memory flows.
-- **REST API** — integrate any agent or framework.
-- **Zero-build Dashboard** — one Python command, no frontend build step.
+- Memory Inspector and provenance
+- Conflict detection and historical timelines
+- Explainable recall traces
+- Provider-neutral Events API
+- Mem0 adapter with privacy-safe defaults
+- LangGraph/LangMem store adapter
+- Provider/operation filters and latency in the dashboard
+- REST API and zero-build local dashboard
+- Python 3.10–3.13 CI matrix
 
 ## API
 
 ```bash
 curl -X POST http://127.0.0.1:8765/v1/memories \
   -H 'content-type: application/json' \
-  -d '{
-    "key": "user.editor",
-    "value": "VS Code",
-    "source": "conversation#12",
-    "memory_type": "preference",
-    "confidence": 0.97
-  }'
+  -d '{"key":"user.editor","value":"VS Code","source":"conversation#12","memory_type":"preference","confidence":0.97}'
 
 curl 'http://127.0.0.1:8765/v1/recall?q=editor'
+curl 'http://127.0.0.1:8765/v1/events?provider=mem0&operation=recall'
 ```
 
 ## Architecture
@@ -129,36 +102,27 @@ curl 'http://127.0.0.1:8765/v1/recall?q=editor'
 Agent / App
     |
     +--> Mem0 ------------------+
-    |                           |
-    +--> LangGraph / LangMem ---+--> EngramScope operation events
-    |                           |        |
-    +--> Custom memory ---------+        +--> latency / namespace / result summaries
+    +--> LangGraph / LangMem ---+--> AgentMemora operation events
+    +--> Custom memory ---------+        |
+                                         +--> latency / namespace / summaries
                                          +--> DevTools UI / API
 
-EngramScope reference store ---> conflicts / timeline / recall trace
+AgentMemora reference store ---> conflicts / timeline / recall trace
 ```
 
-## Where this is going
+## Roadmap
 
-EngramScope aims to become a **vendor-neutral observability + evaluation layer for agent memory** — closer to “DevTools for memory” than another memory database.
-
-Planned adapters and capabilities include Graphiti, Cognee, Hindsight and other agent-memory stacks; memory benchmarks; temporal-consistency evaluation; latency/cost tracing; PII and poisoning checks; and regression tests in CI.
+AgentMemora is building toward a **vendor-neutral observability + evaluation layer for agent memory**. Next: Graphiti/OpenAI Agents adapters, memory diff/rollback, temporal benchmarks, JSONL export, PII/secret hooks, poisoning signals, and regression checks.
 
 See [ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 
-This project is intentionally early. If you build agent memory systems, your edge cases are valuable.
-
-Good first contributions include provider adapters, real memory failure cases, benchmark scenarios, dashboard improvements, and conflict / temporal reasoning improvements.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+Real agent-memory failure cases, provider adapters, benchmark scenarios, dashboard improvements, and security checks are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Philosophy
 
 **Memory should be observable, testable, and reversible.**
-
-If agent memory becomes part of application state, developers need to debug it with the same rigor as databases, APIs, and code.
 
 ## License
 

@@ -3,34 +3,25 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "engramscope"
+name = "agentmemora"
 version = "0.1.0"
-description = "Open-source DevTools for AI agent memory: inspect writes, recalls, conflicts, timelines, and provenance."
+description = "Open-source DevTools for AI agent memory: inspect writes, recalls, conflicts, timelines, latency, and provenance."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [{name = "Halil Atasoy"}]
-keywords = ["ai", "agents", "memory", "llm", "observability", "devtools"]
-classifiers = [
-  "Development Status :: 3 - Alpha",
-  "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3",
-  "Topic :: Software Development :: Debuggers",
-]
-dependencies = [
-  "fastapi>=0.110",
-  "uvicorn>=0.29",
-  "pydantic>=2.6",
-]
+keywords = ["ai", "agents", "agent-memory", "memory", "llm", "observability", "devtools"]
+classifiers = ["Development Status :: 3 - Alpha", "License :: OSI Approved :: MIT License", "Programming Language :: Python :: 3", "Topic :: Software Development :: Debuggers"]
+dependencies = ["fastapi>=0.110", "uvicorn>=0.29", "pydantic>=2.6"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "httpx>=0.27"]
 
 [project.scripts]
-engramscope = "engramscope.cli:main"
+agentmemora = "agentmemora.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/engramscope"]
+packages = ["src/agentmemora"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

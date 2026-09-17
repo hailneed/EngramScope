@@ -1,17 +1,17 @@
 # Roadmap
 
 ## v0.1 — Inspect
-- [x] Memory writes
-- [x] Provenance/source field
-- [x] Conflict detection
-- [x] Historical timeline
+- [x] Memory writes and provenance
+- [x] Conflict detection and historical timeline
 - [x] Recall traces with reason/score
-- [x] Local dashboard
+- [x] Provider-neutral operation events
+- [x] Provider/operation filters and latency dashboard
 
 ## v0.2 — Integrate
 - [x] Mem0 adapter
-- [ ] LangMem / LangGraph adapter
+- [x] LangMem / LangGraph adapter
 - [ ] OpenAI Agents adapter
+- [ ] Graphiti adapter
 - [ ] Postgres backend
 - [ ] Export/import JSONL
 
@@ -19,8 +19,8 @@
 - [ ] Recall quality metrics
 - [ ] Temporal consistency checks
 - [ ] Contradiction benchmark
-- [ ] Latency and token-cost capture
-- [ ] EngramScope benchmark CLI
+- [ ] Token/cost capture
+- [ ] AgentMemora benchmark CLI
 
 ## v0.4 — Secure
 - [ ] PII / secret detection hooks

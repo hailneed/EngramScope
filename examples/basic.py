@@ -1,10 +1,8 @@
-from engramscope import EngramScope
+from agentmemora import AgentMemora
 
-lens = EngramScope("engramscope-demo.db")
-
+lens = AgentMemora("agentmemora-demo.db")
 first, _ = lens.remember(key="project.database", value="PostgreSQL", source="conversation#1")
 second, conflict = lens.remember(key="project.database", value="MongoDB", source="conversation#9")
-
 print("current:", second.value)
 print("conflict:", bool(conflict))
 print("timeline:", [m.value for m in lens.timeline("project.database")])

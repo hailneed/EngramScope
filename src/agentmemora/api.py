@@ -7,20 +7,16 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 
 from .models import MemoryCreate, OperationEventCreate
-from .service import EngramScope
+from .service import AgentMemora
 
-DB_PATH = os.getenv("ENGRAMSCOPE_DB", "engramscope.db")
-lens = EngramScope(DB_PATH)
-app = FastAPI(
-    title="EngramScope",
-    version="0.1.0",
-    description="DevTools API for inspecting AI-agent memory writes, recalls, conflicts, timelines, and provenance.",
-)
+DB_PATH = os.getenv("AGENTMEMORA_DB", "agentmemora.db")
+lens = AgentMemora(DB_PATH)
+app = FastAPI(title="AgentMemora", version="0.1.0", description="DevTools API for inspecting AI-agent memory writes, recalls, conflicts, timelines, latency, and provenance.")
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "engramscope"}
+    return {"status": "ok", "service": "agentmemora"}
 
 
 @app.post("/v1/memories")
@@ -58,11 +54,10 @@ def create_event(payload: OperationEventCreate):
 
 
 @app.get("/v1/events")
-def list_events(limit: int = Query(100, ge=1, le=500), provider: str | None = None):
-    return lens.events(limit=limit, provider=provider)
+def list_events(limit: int = Query(100, ge=1, le=500), provider: str | None = None, operation: str | None = None):
+    return lens.events(limit=limit, provider=provider, operation=operation)
 
 
 @app.get("/")
 def dashboard():
-    path = Path(__file__).with_name("static") / "index.html"
-    return FileResponse(path)
+    return FileResponse(Path(__file__).with_name("static") / "index.html")

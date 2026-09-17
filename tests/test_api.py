@@ -1,10 +1,7 @@
 from fastapi.testclient import TestClient
-
-from engramscope.api import app
-
+from agentmemora.api import app
 
 def test_health():
-    client = TestClient(app)
-    r = client.get("/health")
+    r = TestClient(app).get("/health")
     assert r.status_code == 200
-    assert r.json()["status"] == "ok"
+    assert r.json() == {"status": "ok", "service": "agentmemora"}
