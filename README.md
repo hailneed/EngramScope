@@ -1,73 +1,110 @@
 # ◉ AgentMemora
 
-**Run one command. See what your AI agents remember locally.**
+**Run one command. See what your AI coding agents have been doing locally.**
 
-> Inspect agent memory/context, provenance, duplicates, conflicts, and runtime recall behavior — without replacing your memory provider.
+> Turn local agent session logs, memory files, instructions, and runtime memory events into a readable DevTools view.
 
-<p align="center"><img src="docs/AgentMemora-preview.svg" alt="AgentMemora — memory inspector and observability" width="100%" /></p>
+<p align="center"><img src="docs/AgentMemora-preview.svg" alt="AgentMemora — local agent session, memory, and observability inspector" width="100%" /></p>
 
-AgentMemora is a **local-first DevTools inspector for AI agent memory and context**. The zero-integration scanner discovers supported instruction/memory surfaces used by coding agents, while the Python SDK/adapters observe live memory systems such as Mem0 and LangGraph/LangMem.
+AgentMemora is a **local-first DevTools inspector for AI agent sessions, memory, and context**. Its zero-integration scanner inventories Claude Code JSONL transcripts and supported local memory/instruction surfaces; the Python SDK/adapters observe live memory systems such as Mem0 and LangGraph/LangMem.
 
-**Memory is application state. It should be observable, testable, and debuggable.**
+AgentMemora deliberately distinguishes **session history** from **curated memory**. A Claude Code `~/.claude/projects/<project>/<session>.jsonl` transcript is not the same thing as `MEMORY.md`, but both are useful state to inspect.
 
 ## One-command inspector
 
 Prerequisite: Node.js 20+.
 
-After the npm alpha is published, the primary command is:
+After the npm alpha is published:
 
 ```bash
 npx -y agentmemora@latest
 ```
 
-Until the npm release is published, run the package directly from GitHub:
+Until then, run directly from GitHub:
 
 ```bash
 npx --yes --package=github:hailneed/agentmemora agentmemora
 ```
 
-AgentMemora scans the current workspace plus a small allowlist of supported agent locations in your home directory, starts a dashboard on `127.0.0.1:8765`, and opens it in your browser.
+AgentMemora starts a read-only dashboard on `127.0.0.1:8765` and opens it in your browser.
 
-Useful commands:
+### Claude Code session inventory
 
-```bash
-agentmemora scan --path C:\work\project
-agentmemora scan --no-home
-agentmemora scan --port 8877
-agentmemora doctor
+AgentMemora scans:
+
+```text
+~/.claude/projects/**/*.jsonl
 ```
 
-### What it discovers today
+and turns the raw JSONL into a readable inventory with:
+
+- projects and sessions
+- primary sessions vs subagent transcripts
+- user prompt count
+- assistant record count
+- tool-call and tool-result counts
+- most-used tools
+- models observed
+- token usage metadata persisted in the logs
+- session duration, branch, cwd, file size, and source path
+- readable user/assistant transcript snippets
+
+Token values are observed JSONL metadata, not a billing statement; persistence details can vary across Claude Code versions.
+
+To focus only on Claude session history:
+
+```bash
+agentmemora sessions
+```
+
+### How `scan --path` works
+
+`--path` selects the **workspace/project directory** whose context files should be inspected. It does not replace Claude home-session discovery.
+
+```bash
+agentmemora scan --path /Users/alice/work/my-project
+```
+
+This scans the selected workspace for supported files such as `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/**`, and `.github/copilot-instructions.md`, while also discovering supported home-level sources and Claude JSONL sessions.
+
+Windows example:
+
+```powershell
+agentmemora scan --path "C:\Users\alice\source\my-project"
+```
+
+Disable all home discovery, including Claude JSONL sessions:
+
+```bash
+agentmemora scan --path ./my-project --no-home
+```
+
+Keep home memory/instruction discovery but skip session JSONLs:
+
+```bash
+agentmemora scan --path ./my-project --no-sessions
+```
+
+### Memory and context sources
+
+AgentMemora also discovers supported local surfaces including:
 
 - `AGENTS.md`
-- `CLAUDE.md` and `.claude/CLAUDE.md`
-- `GEMINI.md`
+- `CLAUDE.md`
+- `~/.claude/projects/<project>/memory/**/*.md`
+- `GEMINI.md` and `~/.gemini/GEMINI.md`
 - `MEMORY.md`-style explicit memory files
 - `.github/copilot-instructions.md`
 - `.github/instructions/**/*.instructions.md`
-- `$HOME/.copilot/copilot-instructions.md`
-- `$HOME/.copilot/instructions/**/*.instructions.md`
+- `$HOME/.copilot/...`
 - `.cursor/rules/**`
-- selected `.codex/**` Markdown/text context
+- `$CODEX_HOME/memories/**` (default `~/.codex/memories/**`)
 
-AgentMemora does **not** blindly crawl your PC. It does not scan `.env`, SSH keys, browser credential stores, keychains, or arbitrary documents. Discovery is read-only, the dashboard binds to localhost, and there is no telemetry by default.
-
-Cloud-only vendor memory cannot be discovered from disk unless that provider exposes an official/local integration surface.
-
-## What the dashboard shows
-
-- detected provider/source
-- exact provenance path
-- searchable instruction/memory content
-- source size and modification metadata
-- duplicate/overlapping instructions across agents
-- provider counts and scan scope
-
-Next iterations add semantic conflict detection, more tested provider-specific local adapters, and richer cross-agent timelines.
+AgentMemora does **not** blindly crawl your PC. It does not intentionally scan `.env`, SSH keys, browser credential stores, keychains, or arbitrary documents. Discovery is read-only, the dashboard binds to localhost, and there is no telemetry by default.
 
 ## Live memory observability
 
-The existing Python SDK remains the advanced instrumentation layer for observing memory while an agent runs.
+The Python SDK remains the advanced instrumentation layer for observing memory while an agent runs.
 
 ```python
 from agentmemora import AgentMemora
@@ -111,17 +148,15 @@ Raw external-provider memory payloads and search queries are not persisted by de
 ## Architecture
 
 ```text
-Local discovery                         Runtime observability
-AGENTS.md / CLAUDE.md / Copilot        Mem0 / LangGraph / custom memory
-            |                                      |
-            +------------------+-------------------+
-                               |
-                     provider-neutral view
-                               |
-                    AgentMemora DevTools UI
+Local session history        Local memory/context        Runtime memory
+Claude Code JSONL            AGENTS / MEMORY / rules     Mem0 / LangGraph
+        |                              |                       |
+        +------------------------------+-----------------------+
+                                       |
+                            AgentMemora DevTools UI
 ```
 
-AgentMemora is **not another shared-memory database**. It is the DevTools layer beside the memory systems and context files your agents already use.
+AgentMemora is **not another shared-memory database**. It is an inspection and observability layer beside the state your agents already create and use.
 
 ## Development
 
@@ -130,6 +165,7 @@ Node inspector:
 ```bash
 npm run test:node
 node ./bin/agentmemora.js --no-open
+node ./bin/agentmemora.js sessions --no-open
 ```
 
 Python SDK:
@@ -143,13 +179,13 @@ agentmemora serve
 
 ## Roadmap
 
-Next: semantic conflict detection, Graphiti/OpenAI Agents adapters, memory diff/rollback, temporal benchmarks, JSONL export, PII/secret hooks, poisoning signals, and memory regression checks.
+Next: richer session analytics, semantic conflict detection, Graphiti/OpenAI Agents adapters, memory diff/rollback, temporal benchmarks, JSONL export, PII/secret hooks, poisoning signals, and memory regression checks.
 
 See [ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 
-Real agent-memory failure cases, discovery adapters, provider adapters, benchmark scenarios, dashboard improvements, and security checks are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Real agent-memory/session failure cases, discovery adapters, provider adapters, benchmark scenarios, dashboard improvements, and security checks are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
