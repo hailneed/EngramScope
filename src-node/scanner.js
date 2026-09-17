@@ -12,28 +12,46 @@ const EXACT_FILES = new Map([
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', '.venv', 'venv', '__pycache__', 'dist', 'build', '.next', '.cache']);
 const MAX_FILE_BYTES = 1024 * 1024;
-const MAX_FILES = 2500;
+const MAX_FILES = 5000;
+const TEXT_EXTENSIONS = new Set(['.md', '.mdc', '.txt']);
+
+function normalized(filePath) {
+  return filePath.replaceAll('\\', '/');
+}
 
 function providerFor(filePath) {
-  const normalized = filePath.replaceAll('\\', '/').toLowerCase();
+  const lower = normalized(filePath).toLowerCase();
   const base = path.basename(filePath);
-  if (base === 'CLAUDE.md' || normalized.includes('/.claude/')) return 'Claude Code';
-  if (base === 'GEMINI.md' || normalized.includes('/.gemini/')) return 'Gemini';
-  if (normalized.includes('/.github/') || normalized.includes('/.copilot/')) return 'GitHub Copilot';
-  if (normalized.includes('/.cursor/')) return 'Cursor';
-  if (normalized.includes('/.codex/')) return 'Codex';
+  if (base === 'CLAUDE.md' || lower.includes('/.claude/')) return 'Claude Code';
+  if (base === 'GEMINI.md' || lower.includes('/.gemini/')) return 'Gemini';
+  if (lower.includes('/.github/') || lower.includes('/.copilot/')) return 'GitHub Copilot';
+  if (lower.includes('/.cursor/')) return 'Cursor';
+  if (lower.includes('/.codex/')) return 'Codex';
   if (base === 'AGENTS.md') return 'Agent instructions';
   return 'Generic memory';
 }
 
+function kindFor(filePath) {
+  const lower = normalized(filePath).toLowerCase();
+  const base = path.basename(filePath).toLowerCase();
+  if (base === 'memory.md' || lower.includes('/memory/') || lower.includes('/memories/')) return 'memory';
+  if (lower.includes('/.cursor/rules/')) return 'rule';
+  if (base === 'agents.md' || base === 'claude.md' || base === 'gemini.md' || base === 'copilot-instructions.md' || lower.includes('/instructions/')) return 'instructions';
+  return 'context';
+}
+
 function isSupported(filePath) {
-  const normalized = filePath.replaceAll('\\', '/');
+  const value = normalized(filePath);
+  const lower = value.toLowerCase();
   const base = path.basename(filePath);
+  const ext = path.extname(base).toLowerCase();
   if (EXACT_FILES.has(base)) return true;
-  if (/\/\.github\/instructions\/.*\.instructions\.md$/i.test(normalized)) return true;
-  if (/\/\.copilot\/instructions\/.*\.instructions\.md$/i.test(normalized)) return true;
-  if (/\/\.cursor\/rules\//i.test(normalized)) return true;
-  if (/\/\.codex\//i.test(normalized) && /\.(md|txt)$/i.test(base)) return true;
+  if (/\/\.github\/instructions\/.*\.instructions\.md$/i.test(value)) return true;
+  if (/\/\.copilot\/instructions\/.*\.instructions\.md$/i.test(value)) return true;
+  if (lower.includes('/.cursor/rules/') && TEXT_EXTENSIONS.has(ext)) return true;
+  if (lower.includes('/.codex/memories/') && TEXT_EXTENSIONS.has(ext)) return true;
+  if (lower.includes('/.codex/') && TEXT_EXTENSIONS.has(ext)) return true;
+  if (/\/\.claude\/projects\/[^/]+\/memory\//i.test(value) && TEXT_EXTENSIONS.has(ext)) return true;
   return false;
 }
 
@@ -53,6 +71,7 @@ function record(filePath, root) {
   return {
     id: Buffer.from(filePath).toString('base64url'),
     provider: providerFor(filePath),
+    kind: kindFor(filePath),
     path: filePath,
     relativePath: path.relative(root, filePath) || path.basename(filePath),
     modifiedAt: read.stat.mtime.toISOString(),
@@ -61,7 +80,7 @@ function record(filePath, root) {
   };
 }
 
-function walk(root, out, state) {
+function walk(root, out, state, recordRoot = root) {
   if (state.visited >= MAX_FILES) return;
   let entries;
   try { entries = fs.readdirSync(root, { withFileTypes: true }); } catch { return; }
@@ -69,21 +88,22 @@ function walk(root, out, state) {
     if (state.visited++ >= MAX_FILES) return;
     const full = path.join(root, entry.name);
     if (entry.isDirectory()) {
-      if (!SKIP_DIRS.has(entry.name)) walk(full, out, state);
+      if (!SKIP_DIRS.has(entry.name)) walk(full, out, state, recordRoot);
       continue;
     }
     if (entry.isFile() && isSupported(full)) {
-      const item = record(full, root);
+      const item = record(full, recordRoot);
       if (item) out.push(item);
     }
   }
 }
 
-function explicitHomeCandidates(home) {
+function explicitHomeCandidates(home, codexHome) {
   return [
     path.join(home, '.copilot', 'copilot-instructions.md'),
     path.join(home, '.claude', 'CLAUDE.md'),
-    path.join(home, '.codex', 'AGENTS.md'),
+    path.join(codexHome, 'AGENTS.md'),
+    path.join(home, '.gemini', 'GEMINI.md'),
     path.join(home, 'AGENTS.md'),
     path.join(home, 'CLAUDE.md'),
     path.join(home, 'GEMINI.md'),
@@ -91,26 +111,44 @@ function explicitHomeCandidates(home) {
   ];
 }
 
-function walkSupportedHomeDirs(home, out) {
-  for (const dir of [path.join(home, '.copilot', 'instructions'), path.join(home, '.cursor', 'rules')]) {
-    if (fs.existsSync(dir)) walk(dir, out, { visited: 0 });
+function walkClaudeProjectMemories(home, out) {
+  const projectsRoot = path.join(home, '.claude', 'projects');
+  let projects;
+  try { projects = fs.readdirSync(projectsRoot, { withFileTypes: true }); } catch { return; }
+  for (const project of projects) {
+    if (!project.isDirectory()) continue;
+    const memoryRoot = path.join(projectsRoot, project.name, 'memory');
+    if (fs.existsSync(memoryRoot)) walk(memoryRoot, out, { visited: 0 }, home);
   }
 }
 
-export function scanSources({ root = process.cwd(), includeHome = true } = {}) {
+function walkSupportedHomeDirs(home, codexHome, out) {
+  const dirs = [
+    path.join(home, '.copilot', 'instructions'),
+    path.join(home, '.cursor', 'rules'),
+    path.join(codexHome, 'memories'),
+  ];
+  for (const dir of dirs) {
+    if (fs.existsSync(dir)) walk(dir, out, { visited: 0 }, home);
+  }
+  walkClaudeProjectMemories(home, out);
+}
+
+export function scanSources({ root = process.cwd(), includeHome = true, home = os.homedir() } = {}) {
   const resolvedRoot = path.resolve(root);
+  const resolvedHome = path.resolve(home);
+  const codexHome = path.resolve(process.env.CODEX_HOME || path.join(resolvedHome, '.codex'));
   const items = [];
   walk(resolvedRoot, items, { visited: 0 });
 
   if (includeHome) {
-    const home = os.homedir();
-    for (const candidate of explicitHomeCandidates(home)) {
+    for (const candidate of explicitHomeCandidates(resolvedHome, codexHome)) {
       if (fs.existsSync(candidate) && isSupported(candidate)) {
-        const item = record(candidate, home);
+        const item = record(candidate, resolvedHome);
         if (item) items.push(item);
       }
     }
-    walkSupportedHomeDirs(home, items);
+    walkSupportedHomeDirs(resolvedHome, codexHome, items);
   }
 
   const unique = new Map(items.map((item) => [path.resolve(item.path), item]));
@@ -138,8 +176,12 @@ export function analyzeSources(items) {
     .map(([text, refs]) => ({ text, refs }));
 
   const providerCounts = {};
-  for (const item of items) providerCounts[item.provider] = (providerCounts[item.provider] ?? 0) + 1;
-  return { providerCounts, duplicates };
+  const kindCounts = {};
+  for (const item of items) {
+    providerCounts[item.provider] = (providerCounts[item.provider] ?? 0) + 1;
+    kindCounts[item.kind] = (kindCounts[item.kind] ?? 0) + 1;
+  }
+  return { providerCounts, kindCounts, duplicates };
 }
 
-export const scannerInternals = { isSupported, providerFor };
+export const scannerInternals = { isSupported, providerFor, kindFor };
