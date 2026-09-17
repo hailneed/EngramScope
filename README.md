@@ -4,6 +4,12 @@
 
 > See what your agents remember, why they remember it, and when memory goes wrong.
 
+<p align="center">
+  <img src="docs/EngramScope-demo.gif" alt="EngramScope demo — memory write, conflict detection, timeline, and recall trace" width="100%" />
+</p>
+
+<p align="center"><strong>Write → Update → Detect conflict → Recall → Explain</strong></p>
+
 EngramScope gives AI-agent developers a local, framework-agnostic way to inspect **memory writes, recall traces, conflicts, timelines, latency, and provenance**. It is designed to sit beside memory systems such as Mem0, Graphiti, Cognee, LangMem, and Hindsight — not replace them.
 
 **The core idea:** memory is application state. It should be observable, testable, and debuggable.
@@ -21,7 +27,7 @@ EngramScope makes questions like these inspectable:
 - Did a new fact contradict an old one?
 - What did the agent believe last week vs. today?
 
-## 60-second demo
+## Quick start
 
 ```bash
 python -m venv .venv
@@ -44,7 +50,7 @@ and update it to:
 project.database = MongoDB
 ```
 
-EngramScope detects the conflict, marks PostgreSQL as historical, and creates a timeline instead of silently overwriting context.
+EngramScope detects the conflict, marks PostgreSQL as historical, creates a timeline, and shows why the active memory is recalled instead of silently overwriting context.
 
 ## Python SDK
 
