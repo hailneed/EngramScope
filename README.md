@@ -1,32 +1,73 @@
 # ◉ AgentMemora
 
-**Open-source DevTools for AI agent memory.**
+**Run one command. See what your AI agents remember locally.**
 
-> See what your agents remember, why they recall it, and when memory goes wrong.
+> Inspect agent memory/context, provenance, duplicates, conflicts, and runtime recall behavior — without replacing your memory provider.
 
-<p align="center"><img src="docs/AgentMemora-preview.svg" alt="AgentMemora — memory conflict, provider events, timeline, and recall trace" width="100%" /></p>
-<p align="center"><strong>Write → Recall → Trace → Detect conflict → Explain</strong></p>
+<p align="center"><img src="docs/AgentMemora-preview.svg" alt="AgentMemora — memory inspector and observability" width="100%" /></p>
 
-AgentMemora gives AI-agent developers a local, framework-agnostic way to inspect **memory writes, recall traces, conflicts, timelines, latency, and provenance**. It sits beside memory systems such as Mem0, Graphiti, Cognee, LangMem, and Hindsight — it does not replace them.
+AgentMemora is a **local-first DevTools inspector for AI agent memory and context**. The zero-integration scanner discovers supported instruction/memory surfaces used by coding agents, while the Python SDK/adapters observe live memory systems such as Mem0 and LangGraph/LangMem.
 
 **Memory is application state. It should be observable, testable, and debuggable.**
 
-## Why AgentMemora?
+## One-command inspector
 
-When an agent produces a wrong answer, the failure may be the model, prompt, RAG pipeline, tool output — or bad memory. AgentMemora makes memory behavior inspectable: what was stored, where it came from, what was recalled, why it ranked, when facts changed, and how external providers behaved.
+Prerequisite: Node.js 20+.
 
-## Quick start
+After the npm alpha is published, the primary command is:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e '.[dev]'
-agentmemora serve
+npx -y agentmemora@latest
 ```
 
-Open `http://127.0.0.1:8765`. Write `project.database = PostgreSQL`, update it to `MongoDB`, then run recall. The dashboard shows the conflict, historical timeline, recall reason, and provider operation events.
+Until the npm release is published, run the package directly from GitHub:
 
-## Python SDK
+```bash
+npx --yes --package=github:hailneed/agentmemora agentmemora
+```
+
+AgentMemora scans the current workspace plus a small allowlist of supported agent locations in your home directory, starts a dashboard on `127.0.0.1:8765`, and opens it in your browser.
+
+Useful commands:
+
+```bash
+agentmemora scan --path C:\work\project
+agentmemora scan --no-home
+agentmemora scan --port 8877
+agentmemora doctor
+```
+
+### What it discovers today
+
+- `AGENTS.md`
+- `CLAUDE.md` and `.claude/CLAUDE.md`
+- `GEMINI.md`
+- `MEMORY.md`-style explicit memory files
+- `.github/copilot-instructions.md`
+- `.github/instructions/**/*.instructions.md`
+- `$HOME/.copilot/copilot-instructions.md`
+- `$HOME/.copilot/instructions/**/*.instructions.md`
+- `.cursor/rules/**`
+- selected `.codex/**` Markdown/text context
+
+AgentMemora does **not** blindly crawl your PC. It does not scan `.env`, SSH keys, browser credential stores, keychains, or arbitrary documents. Discovery is read-only, the dashboard binds to localhost, and there is no telemetry by default.
+
+Cloud-only vendor memory cannot be discovered from disk unless that provider exposes an official/local integration surface.
+
+## What the dashboard shows
+
+- detected provider/source
+- exact provenance path
+- searchable instruction/memory content
+- source size and modification metadata
+- duplicate/overlapping instructions across agents
+- provider counts and scan scope
+
+Next iterations add semantic conflict detection, more tested provider-specific local adapters, and richer cross-agent timelines.
+
+## Live memory observability
+
+The existing Python SDK remains the advanced instrumentation layer for observing memory while an agent runs.
 
 ```python
 from agentmemora import AgentMemora
@@ -38,10 +79,6 @@ lens.remember(key="project.database", value="MongoDB", source="conversation#41")
 for hit in lens.recall("what database does the project use?"):
     print(hit.memory.value, hit.score, hit.reason)
 ```
-
-## Observe existing memory systems
-
-AgentMemora records provider-neutral operation events around existing memory systems. **Raw external-provider memory payloads and search queries are not persisted by default.** Payload capture is explicit opt-in for controlled development environments.
 
 ### Mem0
 
@@ -56,8 +93,6 @@ mem0.add([{"role": "user", "content": "I prefer VS Code"}], user_id="alice")
 mem0.search("preferred editor", user_id="alice")
 ```
 
-No credentials needed for the demo: `python examples/mem0_reproducible.py`.
-
 ### LangGraph / LangMem
 
 ```python
@@ -71,58 +106,50 @@ store.put(("memories", "alice"), "pref-1", {"text": "I prefer dark mode"})
 store.search(("memories", "alice"), query="theme preference", limit=5)
 ```
 
-See `examples/langgraph_observed.py`. Custom stacks can POST provider-neutral events directly to `/v1/events`.
-
-## What v0.1 includes
-
-- Memory Inspector and provenance
-- Conflict detection and historical timelines
-- Explainable recall traces
-- Provider-neutral Events API
-- Mem0 adapter with privacy-safe defaults
-- LangGraph/LangMem store adapter
-- Provider/operation filters and latency in the dashboard
-- REST API and zero-build local dashboard
-- Python 3.10–3.13 CI matrix
-
-## API
-
-```bash
-curl -X POST http://127.0.0.1:8765/v1/memories \
-  -H 'content-type: application/json' \
-  -d '{"key":"user.editor","value":"VS Code","source":"conversation#12","memory_type":"preference","confidence":0.97}'
-
-curl 'http://127.0.0.1:8765/v1/recall?q=editor'
-curl 'http://127.0.0.1:8765/v1/events?provider=mem0&operation=recall'
-```
+Raw external-provider memory payloads and search queries are not persisted by default. Payload capture is explicit opt-in for controlled development environments.
 
 ## Architecture
 
 ```text
-Agent / App
-    |
-    +--> Mem0 ------------------+
-    +--> LangGraph / LangMem ---+--> AgentMemora operation events
-    +--> Custom memory ---------+        |
-                                         +--> latency / namespace / summaries
-                                         +--> DevTools UI / API
+Local discovery                         Runtime observability
+AGENTS.md / CLAUDE.md / Copilot        Mem0 / LangGraph / custom memory
+            |                                      |
+            +------------------+-------------------+
+                               |
+                     provider-neutral view
+                               |
+                    AgentMemora DevTools UI
+```
 
-AgentMemora reference store ---> conflicts / timeline / recall trace
+AgentMemora is **not another shared-memory database**. It is the DevTools layer beside the memory systems and context files your agents already use.
+
+## Development
+
+Node inspector:
+
+```bash
+npm run test:node
+node ./bin/agentmemora.js --no-open
+```
+
+Python SDK:
+
+```bash
+python -m venv .venv
+pip install -e '.[dev]'
+pytest -q
+agentmemora serve
 ```
 
 ## Roadmap
 
-AgentMemora is building toward a **vendor-neutral observability + evaluation layer for agent memory**. Next: Graphiti/OpenAI Agents adapters, memory diff/rollback, temporal benchmarks, JSONL export, PII/secret hooks, poisoning signals, and regression checks.
+Next: semantic conflict detection, Graphiti/OpenAI Agents adapters, memory diff/rollback, temporal benchmarks, JSONL export, PII/secret hooks, poisoning signals, and memory regression checks.
 
 See [ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 
-Real agent-memory failure cases, provider adapters, benchmark scenarios, dashboard improvements, and security checks are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Philosophy
-
-**Memory should be observable, testable, and reversible.**
+Real agent-memory failure cases, discovery adapters, provider adapters, benchmark scenarios, dashboard improvements, and security checks are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
