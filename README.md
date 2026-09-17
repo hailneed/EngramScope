@@ -38,19 +38,7 @@ engramscope serve
 
 Open `http://127.0.0.1:8765`.
 
-Then write:
-
-```text
-project.database = PostgreSQL
-```
-
-and update it to:
-
-```text
-project.database = MongoDB
-```
-
-EngramScope detects the conflict, marks PostgreSQL as historical, creates a timeline, and shows why the active memory is recalled instead of silently overwriting context.
+Then write `project.database = PostgreSQL` and update it to `project.database = MongoDB`. EngramScope detects the conflict, marks PostgreSQL as historical, creates a timeline, and shows why the active memory is recalled instead of silently overwriting context.
 
 ## Python SDK
 
@@ -59,27 +47,20 @@ from engramscope import EngramScope
 
 lens = EngramScope("engramscope.db")
 
-lens.remember(
-    key="project.database",
-    value="PostgreSQL",
-    source="conversation#23",
-    confidence=0.94,
-)
+lens.remember(key="project.database", value="PostgreSQL", source="conversation#23", confidence=0.94)
+current, conflict = lens.remember(key="project.database", value="MongoDB", source="conversation#41")
 
-current, conflict = lens.remember(
-    key="project.database",
-    value="MongoDB",
-    source="conversation#41",
-)
-
-hits = lens.recall("what database does the project use?")
-for hit in hits:
+for hit in lens.recall("what database does the project use?"):
     print(hit.memory.value, hit.score, hit.reason)
 ```
 
-## Observe an existing memory system
+## Observe existing memory systems
 
-EngramScope can record operations from external providers. The first adapter targets Mem0 and wraps an already configured client. Raw message payloads are **not captured by default**.
+EngramScope records provider-neutral operation events without replacing the underlying memory implementation. **Raw memory payloads and recall queries are not captured by default.**
+
+### Mem0
+
+Wrap an already configured Mem0 client:
 
 ```python
 from mem0 import MemoryClient
@@ -88,16 +69,33 @@ from engramscope.adapters import ObservedMem0
 
 lens = EngramScope("engramscope.db")
 mem0 = ObservedMem0(MemoryClient(api_key="..."), lens)
-
-mem0.add(
-    [{"role": "user", "content": "I prefer VS Code"}],
-    user_id="alice",
-)
+mem0.add([{"role": "user", "content": "I prefer VS Code"}], user_id="alice")
 mem0.search("preferred editor", user_id="alice")
-
-for event in lens.events(provider="mem0"):
-    print(event.operation, event.latency_ms, event.output_summary)
 ```
+
+No Mem0 credentials yet? Run the deterministic compatibility demo:
+
+```bash
+python examples/mem0_local_demo.py
+```
+
+### LangGraph / LangMem
+
+LangMem memory tools persist and search through LangGraph's store layer. Wrap a BaseStore-compatible store before giving it to your graph or memory tools:
+
+```python
+from langgraph.store.memory import InMemoryStore
+from engramscope import EngramScope
+from engramscope.adapters import ObservedLangGraphStore
+
+lens = EngramScope("engramscope.db")
+store = ObservedLangGraphStore(InMemoryStore(), lens)
+
+store.put(("memories", "alice"), "editor", {"content": "I prefer VS Code"})
+store.search(("memories", "alice"))
+```
+
+See `examples/langgraph_store_observed.py`. The adapter currently instruments the synchronous `put`, `get`, `search`, and `delete` paths; async instrumentation is tracked separately.
 
 You can also POST provider-neutral events directly to `/v1/events`, which makes it possible to instrument custom memory stacks without adopting the reference store.
 
@@ -110,6 +108,7 @@ You can also POST provider-neutral events directly to `/v1/events`, which makes 
 - **Provenance** — attach source information to every memory.
 - **Provider-neutral Events API** — record writes/recalls from any memory backend.
 - **Mem0 Adapter** — capture write/recall operations and latency without changing your Mem0 setup.
+- **LangGraph/LangMem Store Adapter** — observe BaseStore-compatible memory operations.
 - **REST API** — integrate any agent or framework.
 - **Zero-build Dashboard** — one Python command, no frontend build step.
 
@@ -118,13 +117,7 @@ You can also POST provider-neutral events directly to `/v1/events`, which makes 
 ```bash
 curl -X POST http://127.0.0.1:8765/v1/memories \
   -H 'content-type: application/json' \
-  -d '{
-    "key": "user.editor",
-    "value": "VS Code",
-    "source": "conversation#12",
-    "memory_type": "preference",
-    "confidence": 0.97
-  }'
+  -d '{"key":"user.editor","value":"VS Code","source":"conversation#12","memory_type":"preference","confidence":0.97}'
 
 curl 'http://127.0.0.1:8765/v1/recall?q=editor'
 ```
@@ -134,22 +127,20 @@ curl 'http://127.0.0.1:8765/v1/recall?q=editor'
 ```text
 Agent / App
     |
-    v
-EngramScope SDK
+    +--> Mem0 ------------------+
+    |                           |
+    +--> LangGraph / LangMem ---+--> EngramScope Events --> SQLite --> API + DevTools UI
+    |                           |          |
+    +--> Custom memory stack ---+          +--> latency / namespace / operation / summaries
     |
-    +--> Memory writes ------> Store ------> conflicts / timeline
-    |
-    +--> Memory recalls -----> Trace ------> score / reason / provenance
-                                      |
-                                      v
-                               API + DevTools UI
+    +--> EngramScope reference memory --> conflicts / timeline / recall trace
 ```
 
 ## Where this is going
 
 EngramScope aims to become a **vendor-neutral observability + evaluation layer for agent memory** — closer to “DevTools for memory” than another memory database.
 
-Planned adapters and capabilities include Mem0, LangMem/LangGraph, OpenAI Agents, Graphiti, Cognee and Hindsight; memory benchmarks; temporal-consistency evaluation; latency/cost tracing; PII and poisoning checks; and regression tests in CI.
+Planned capabilities include Graphiti, Cognee and Hindsight adapters; async instrumentation; memory benchmarks; temporal-consistency evaluation; latency/cost tracing; PII and poisoning checks; and regression tests in CI.
 
 See [ROADMAP.md](docs/ROADMAP.md).
 
@@ -157,13 +148,7 @@ See [ROADMAP.md](docs/ROADMAP.md).
 
 This project is intentionally early. If you build agent memory systems, your edge cases are valuable.
 
-Good first contributions:
-
-- build a Mem0 / LangMem / Graphiti adapter,
-- contribute a real memory failure case,
-- add a benchmark scenario,
-- improve the dashboard,
-- improve conflict / temporal reasoning.
+Good first contributions include provider adapters, real memory failure cases, benchmark scenarios, dashboard improvements, and conflict / temporal reasoning improvements.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
