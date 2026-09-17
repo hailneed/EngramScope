@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { scanSources, analyzeSources } from '../src-node/scanner.js';
 import { scanClaudeSessions, analyzeClaudeSessions } from '../src-node/session-scanner.js';
+import { analyzeMemoryIntelligence, buildContextCapsule, appendMemory } from '../src-node/memory-intelligence.js';
 import { renderDashboard, startDashboard } from '../src-node/dashboard.js';
 
 const args = process.argv.slice(2);
@@ -16,7 +18,7 @@ function openBrowser(url) {
 }
 
 function help() {
-  console.log(`AgentMemora — local-first AI agent session, memory, and context inspector\n\nUsage:\n  agentmemora [scan] [--path <dir>] [--port 8765] [--no-home] [--no-sessions] [--no-open]\n  agentmemora sessions [--port 8765] [--no-open]\n  agentmemora doctor\n\nWhat --path means:\n  It selects the workspace whose AGENTS.md / CLAUDE.md / rules / context files are scanned.\n  Claude Code session JSONL inventory is discovered separately from ~/.claude/projects when home scanning is enabled.\n\nExamples:\n  npx -y agentmemora@latest\n  npx -y agentmemora@latest scan --path C:\\work\\project\n  npx -y agentmemora@latest sessions\n`);
+  console.log(`AgentMemora — memory & context control plane for AI coding agents\n\nUsage:\n  agentmemora [scan] [--path <dir>] [--port 8765] [--no-home] [--no-sessions] [--no-open]\n  agentmemora sessions [--port 8765] [--no-open]\n  agentmemora capsule --session <id> [--output context.md]\n  agentmemora promote --target <MEMORY.md|CLAUDE.md> (--text <text> | --from <file>) --yes\n  agentmemora doctor\n\nCore idea:\n  Inspect what agents know, find context that exists only inside sessions, preserve it as memory,\n  and create portable Context Capsules without editing vendor JSONL transcripts.\n\nExamples:\n  npx -y agentmemora@latest\n  agentmemora scan --path C:\\work\\project\n  agentmemora capsule --session 7a92 --output riva-context.md\n  agentmemora promote --target ~/.claude/projects/my-project/memory/MEMORY.md --text "- Use pnpm for this project" --yes\n`);
 }
 
 if (has('--help') || has('-h') || command === 'help') { help(); process.exit(0); }
@@ -25,11 +27,55 @@ if (command === 'doctor') {
   console.log(`✓ Node ${process.version}`);
   console.log(`✓ Platform ${process.platform} ${process.arch}`);
   console.log(`✓ Workspace ${process.cwd()}`);
-  console.log('✓ Scan mode is read-only');
+  console.log('✓ Vendor session JSONL is read-only');
+  console.log('✓ Memory writes require an explicit target and --yes');
+  console.log('✓ Memory writes create a local backup first');
   console.log('✓ Claude session discovery: ~/.claude/projects/**/*.jsonl');
   console.log('✓ Dashboard binds to 127.0.0.1 only');
   process.exit(0);
 }
+
+if (command === 'capsule') {
+  const sessionRef = valueOf('--session');
+  if (!sessionRef) { console.error('Missing --session <id>.'); process.exit(1); }
+  const sessions = scanClaudeSessions();
+  const matches = sessions.filter((session) => session.sessionId === sessionRef || session.sessionId.startsWith(sessionRef));
+  if (matches.length !== 1) {
+    console.error(matches.length ? `Session prefix is ambiguous (${matches.length} matches). Use a longer ID.` : `Session not found: ${sessionRef}`);
+    process.exit(1);
+  }
+  const capsule = buildContextCapsule(matches[0]);
+  const output = valueOf('--output');
+  if (output) {
+    const target = path.resolve(output);
+    fs.writeFileSync(target, capsule, 'utf8');
+    console.log(`✓ Context Capsule written to ${target}`);
+  } else console.log(capsule);
+  process.exit(0);
+}
+
+if (command === 'promote') {
+  const target = valueOf('--target');
+  const from = valueOf('--from');
+  const inline = valueOf('--text');
+  if (!target || (!from && !inline)) {
+    console.error('Usage: agentmemora promote --target <memory file> (--text <text> | --from <file>) --yes');
+    process.exit(1);
+  }
+  let text = inline;
+  if (from) text = fs.readFileSync(path.resolve(from), 'utf8');
+  try {
+    const result = appendMemory({ target, text, confirm: has('--yes') });
+    console.log(`✓ Memory updated: ${result.target}`);
+    console.log(`✓ Backup directory: ${result.backupDir}`);
+    console.log(`✓ Added ${result.bytesAdded} bytes`);
+  } catch (error) {
+    console.error(error?.message ?? error);
+    process.exit(1);
+  }
+  process.exit(0);
+}
+
 if (!['scan', 'sessions'].includes(command)) { console.error(`Unknown command: ${command}`); help(); process.exit(1); }
 
 const root = path.resolve(valueOf('--path', process.cwd()));
@@ -37,28 +83,29 @@ const port = Number(valueOf('--port', '8765'));
 const includeHome = command === 'sessions' ? true : !has('--no-home');
 const includeSessions = command === 'sessions' || (includeHome && !has('--no-sessions'));
 
-console.log('\n◉ AgentMemora');
-console.log('  Local AI agent session, memory, and context inspector\n');
+console.log('\n◉ AgentMemora // MEMORY INTELLIGENCE');
+console.log('  Inspect · preserve · transfer agent context\n');
 if (command !== 'sessions') console.log(`Scanning workspace: ${root}`);
 console.log(includeHome ? 'Home scan: supported agent locations enabled' : 'Home scan: disabled');
 console.log(includeSessions ? 'Claude sessions: ~/.claude/projects/**/*.jsonl' : 'Claude sessions: disabled');
-console.log('Mode: read-only · no telemetry\n');
+console.log('Vendor session logs: read-only · dashboard: localhost · telemetry: off\n');
 
 const items = command === 'sessions' ? [] : scanSources({ root, includeHome });
 const analysis = analyzeSources(items);
 const sessions = includeSessions ? scanClaudeSessions() : [];
 const sessionAnalysis = analyzeClaudeSessions(sessions);
+const memoryIntelligence = analyzeMemoryIntelligence(items, sessions);
 
 for (const [provider, count] of Object.entries(analysis.providerCounts)) console.log(`✓ ${provider}: ${count} context source${count === 1 ? '' : 's'}`);
 if (includeSessions) {
   const t = sessionAnalysis.totals;
   console.log(`✓ Claude Code: ${t.sessions} sessions + ${t.subagents} subagent transcripts across ${t.projects} projects`);
-  console.log(`✓ Session activity: ${t.userPrompts} user prompts · ${t.assistantMessages} assistant records · ${t.toolCalls} tool calls`);
 }
-console.log(`\n✓ ${items.length} supported context/memory source${items.length === 1 ? '' : 's'} discovered`);
-console.log(`✓ ${analysis.duplicates.length} duplicate/overlapping instruction${analysis.duplicates.length === 1 ? '' : 's'} detected`);
+const m = memoryIntelligence.totals;
+console.log(`✓ Memory posture: ${m.memories} memory files · ${m.sessionCandidates} candidate facts · ${m.contextLossRisks} context-loss risks · ${m.conflicts} potential conflicts`);
+console.log(`✓ Preservation coverage: ${m.preservationCoverage}% of detected session memory candidates already appear in durable context`);
 
-const html = renderDashboard({ items, analysis, sessions, sessionAnalysis, root });
+const html = renderDashboard({ items, analysis, sessions, sessionAnalysis, memoryIntelligence, root });
 try {
   await startDashboard({ html, port });
   const url = `http://127.0.0.1:${port}`;
