@@ -1,7 +1,7 @@
 {
   "name": "agentmemora",
-  "version": "0.1.0-alpha.1",
-  "description": "Local-first DevTools inspector for AI agent memory and context.",
+  "version": "0.1.0-alpha.2",
+  "description": "Local-first memory and context control plane for AI coding agents.",
   "type": "module",
   "bin": {
     "agentmemora": "./bin/agentmemora.js"
@@ -13,7 +13,7 @@
     "start": "node ./bin/agentmemora.js",
     "test:node": "node --test test-node/*.test.js"
   },
-  "keywords": ["ai", "agents", "memory", "observability", "copilot", "claude", "cursor", "codex", "devtools"],
+  "keywords": ["ai", "agents", "memory", "context", "claude-code", "codex", "cursor", "copilot", "devtools", "local-first"],
   "license": "MIT",
   "repository": {
     "type": "git",
