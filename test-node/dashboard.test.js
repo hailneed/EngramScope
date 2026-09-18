@@ -86,6 +86,9 @@ test('dashboard renders the intelligence terminal memory workspace', () => {
   assert.match(html, /class="topnav"/);
   assert.doesNotMatch(html, /class="sidebar"/);
   assert.match(html, /Know what your agents/);
+  assert.match(html, /START HERE/);
+  assert.match(html, /Choose a project/);
+  assert.match(html, /Preserve useful context/);
   assert.match(html, /Memory Intelligence Workspace/);
   assert.match(html, /Memory Evidence Viewer/);
   assert.match(html, /Subagent Comms/);
