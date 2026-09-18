@@ -44,7 +44,7 @@ const subagent = {
   ],
 };
 
-test('dashboard renders the light top-nav memory workspace', () => {
+test('dashboard renders the intelligence terminal memory workspace', () => {
   const html = renderDashboard({
     items: [memoryItem],
     analysis: {},
@@ -68,12 +68,12 @@ test('dashboard renders the light top-nav memory workspace', () => {
 
   assert.match(html, /class="topnav"/);
   assert.doesNotMatch(html, /class="sidebar"/);
-  assert.match(html, /Turn agent conversations into/);
-  assert.match(html, /Memory Workspace/);
-  assert.match(html, /Memory Preview/);
-  assert.match(html, /Subagent Conversations/);
+  assert.match(html, /Know what your agents/);
+  assert.match(html, /Memory Intelligence Workspace/);
+  assert.match(html, /Memory Evidence Viewer/);
+  assert.match(html, /Subagent Comms/);
   assert.match(html, /Review memory conflicts/);
   assert.match(html, /Context Coverage/);
-  assert.match(html, /Local · Read-only/);
+  assert.match(html, /Local · Read-only/);\n  assert.match(html, /class=\"intel-strip\"/);\n  assert.match(html, /OPERATIONAL MEMORY INTELLIGENCE/);\n  assert.match(html, /WRITE GUARD/);
   assert.match(html, /selectMemory/);
 });
