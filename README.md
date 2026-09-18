@@ -59,7 +59,7 @@ Session/tool/model statistics remain available as supporting evidence, but **mem
 
 ## Memory Intelligence
 
-AgentMemora currently combines supported durable sources with Claude Code local session history and produces a **Memory Posture** view:
+AgentMemora currently combines supported durable sources with Claude Code local session history and produces a **Memory Posture** view. The project-first explorer groups primary sessions and subagent traces by local project so you can see the full context footprint before opening individual histories:
 
 - durable memory and instruction inventory
 - session-only memory candidates
@@ -68,6 +68,7 @@ AgentMemora currently combines supported durable sources with Claude Code local 
 - stale memory detection (90+ days)
 - provenance for every source
 - session → memory coverage estimate
+- project-level session and subagent inventory
 - exact-session Resume and Fork commands
 - deterministic Context Capsule export
 

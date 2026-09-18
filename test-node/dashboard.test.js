@@ -44,13 +44,30 @@ const subagent = {
   ],
 };
 
+const extraSubagents = Array.from({ length: 10 }, (_, index) => ({
+  ...subagent,
+  id: `subagent-extra-${index + 1}`,
+  sessionId: `agent-extra-${index + 1}`,
+  title: `Subagent trace ${index + 1}`,
+  toolCalls: index + 1,
+}));
+
+const secondProject = {
+  ...primary,
+  id: 'primary-2',
+  sessionId: 'session-789',
+  projectSlug: 'second-project',
+  cwd: '/Users/demo/projects/second-project',
+  title: 'Second project session',
+};
+
 test('dashboard renders the intelligence terminal memory workspace', () => {
   const html = renderDashboard({
     items: [memoryItem],
     analysis: {},
-    sessions: [primary, subagent],
+    sessions: [primary, subagent, ...extraSubagents, secondProject],
     sessionAnalysis: {
-      totals: { sessions: 1, subagents: 1, projects: 1, userPrompts: 4, assistantMessages: 3, toolCalls: 11 },
+      totals: { sessions: 2, subagents: 11, projects: 2, userPrompts: 8, assistantMessages: 3, toolCalls: 76 },
       toolCounts: { Read: 4, Edit: 2, Bash: 2 },
       modelCounts: { 'claude-sonnet': 1 },
       projectCounts: { demo: 2 },
@@ -72,6 +89,12 @@ test('dashboard renders the intelligence terminal memory workspace', () => {
   assert.match(html, /Memory Intelligence Workspace/);
   assert.match(html, /Memory Evidence Viewer/);
   assert.match(html, /Subagent Comms/);
+  assert.match(html, /Project Explorer &amp; Context Transfer|Project Explorer & Context Transfer/);
+  assert.match(html, /agentmemora/);
+  assert.match(html, /second-project/);
+  assert.match(html, /11 total/);
+  assert.match(html, /Subagent trace 10/);
+  assert.doesNotMatch(html, /SHOW ALL SUBAGENT TRANSCRIPTS/);
   assert.match(html, /Review memory conflicts/);
   assert.match(html, /Context Coverage/);
   assert.match(html, /Local · Read-only/);
