@@ -1,8 +1,10 @@
 # ◉ AgentMemora
 
-**Memory & Context Control Plane for AI Coding Agents.**
+**Memory Intelligence for AI Coding Agents.**
 
-> Inspect what your agents know. Preserve important context. Move it between sessions, machines, and agents.
+> Inspect what your agents know. Find context worth preserving. Move it between sessions, machines, and agents.
+
+[![npm version](https://img.shields.io/npm/v/agentmemora.svg)](https://www.npmjs.com/package/agentmemora) [![CI](https://github.com/hailneed/agentmemora/actions/workflows/ci.yml/badge.svg)](https://github.com/hailneed/agentmemora/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 <p align="center"><img src="docs/AgentMemora-preview.svg" alt="AgentMemora memory intelligence console" width="100%" /></p>
 
@@ -25,23 +27,21 @@ Claude JSONL             Auto memory              CLAUDE.md / AGENTS.md
              +-------- Curate / Preserve / Transfer ----+
 ```
 
-## One command
+## Run it
 
 Prerequisite: Node.js 20+.
-
-After the npm alpha is published:
 
 ```bash
 npx -y agentmemora@latest
 ```
 
-Until then, run the current GitHub build:
+No account. No API key. No telemetry. The dashboard opens locally on `127.0.0.1:8765`, and vendor session logs remain read-only.
+
+Want to inspect the environment first?
 
 ```bash
-npx --yes --package=github:hailneed/agentmemora agentmemora
+npx -y agentmemora@latest doctor
 ```
-
-The dashboard opens on `127.0.0.1:8765`. Vendor session logs are read-only. There is no telemetry.
 
 ## What makes AgentMemora different
 
