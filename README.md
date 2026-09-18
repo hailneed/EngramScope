@@ -73,6 +73,8 @@ AgentMemora currently combines supported durable sources with Claude Code local 
 
 Candidate/risk detection is intentionally heuristic and is labeled as such. AgentMemora does not pretend that a regex is semantic truth.
 
+The default dashboard is organized as a compact developer tool rather than a generic analytics platform: top navigation, visual memory/session/subagent posture, recent context activity, then a **Memory Workspace** where durable files, readable content, provenance, and subagent conversation excerpts sit side by side. Tool/model analytics stay lower in the page as supporting telemetry.
+
 ## Context Capsules
 
 A Context Capsule is a portable Markdown handoff extracted from a local session. It contains provenance, user intent/constraints, recent working state, and a tool footprint while intentionally excluding raw tool results.
