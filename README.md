@@ -73,7 +73,7 @@ AgentMemora currently combines supported durable sources with Claude Code local 
 
 Candidate/risk detection is intentionally heuristic and is labeled as such. AgentMemora does not pretend that a regex is semantic truth.
 
-The default dashboard is organized as a compact developer tool rather than a generic analytics platform: top navigation, visual memory/session/subagent posture, recent context activity, then a **Memory Workspace** where durable files, readable content, provenance, and subagent conversation excerpts sit side by side. Tool/model analytics stay lower in the page as supporting telemetry.
+The default dashboard is organized as a compact **memory intelligence console** rather than a generic analytics platform: top command navigation, an operational status rail, dense memory/session/subagent posture, recent context activity, then a **Memory Intelligence Workspace** where durable files, readable source evidence, provenance, and subagent comms sit side by side. The visual language is deliberately terminal-inspired and intelligence-oriented without turning into a neon hacker theme. Tool/model analytics stay lower in the page as supporting telemetry.
 
 ## Context Capsules
 
