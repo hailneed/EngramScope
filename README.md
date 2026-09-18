@@ -6,7 +6,7 @@
 
 [![npm version](https://img.shields.io/npm/v/agentmemora.svg)](https://www.npmjs.com/package/agentmemora) [![CI](https://github.com/hailneed/agentmemora/actions/workflows/ci.yml/badge.svg)](https://github.com/hailneed/agentmemora/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-<p align="center"><img src="docs/AgentMemora-preview.svg" alt="AgentMemora memory intelligence console" width="100%" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/hailneed/agentmemora/main/docs/AgentMemora-preview.svg" alt="AgentMemora memory intelligence console" width="100%" /></p>
 
 AgentMemora is a **local-first memory intelligence layer** for coding agents. It reads the state your tools already create — session transcripts, auto-memory, project instructions, rules, and runtime memory events — and turns it into a control plane for **inspection, curation, preservation, and transfer**.
 
@@ -42,6 +42,22 @@ Want to inspect the environment first?
 ```bash
 npx -y agentmemora@latest doctor
 ```
+
+## Start here
+
+The first useful path is intentionally simple:
+
+```text
+Choose a project
+      ↓
+Inspect its primary sessions + every indexed subagent trace
+      ↓
+Compare session-only context with durable memory/instructions
+      ↓
+Resume / Fork / export a Context Capsule before useful context is lost
+```
+
+The dashboard groups local history by project first, so you do not have to hunt through one global session stream.
 
 ## What makes AgentMemora different
 
@@ -229,7 +245,7 @@ pytest -q
 
 ## Roadmap
 
-Next: reviewed candidate → memory promotion from the UI, semantic conflict analysis, selective Context Surgery, cross-agent capsule adapters, memory diff/rollback, secret/PII redaction hooks, and memory regression checks.
+v0.2 focuses on making local context understandable: project-first navigation, complete indexed subagent visibility, compact session browsing, and a clear first-run workflow. Next: reviewed candidate → memory promotion from the UI, semantic conflict analysis, selective Context Surgery, cross-agent capsule adapters, memory diff/rollback, secret/PII redaction hooks, and memory regression checks.
 
 See [ROADMAP.md](docs/ROADMAP.md).
 

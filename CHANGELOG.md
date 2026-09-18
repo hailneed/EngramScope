@@ -1,17 +1,34 @@
 # Changelog
 
-## 0.1.0-alpha.2 — Unreleased
+All notable public changes to AgentMemora are documented here.
 
-- Repositioned AgentMemora as a **Memory & Context Control Plane for AI coding agents**.
-- Added premium terminal-style Memory Intelligence dashboard.
-- Added session-only memory candidate and context-loss risk detection.
-- Added conservative key/value conflict detection across durable memory sources.
-- Added preservation coverage and stale-memory posture signals.
-- Added deterministic **Context Capsule** export from Claude Code sessions.
-- Added copyable Claude Code Resume and Fork commands per session.
-- Added guarded `promote` command for reviewed memory curation with explicit `--yes` and automatic backups.
-- Kept vendor JSONL transcripts read-only.
-- Moved tool/model/token statistics to supporting telemetry instead of the product center.
+## 0.2.0 — 2026-09-18
+
+### Project-first context browsing
+- Group Claude Code history by local project.
+- Show primary-session, subagent, prompt, and tool counts per project.
+- Browse primary sessions in compact cards instead of one full-width stream.
+- Show every indexed subagent transcript under its project rather than truncating the detailed list.
+- Search across projects, sessions, subagents, models, tools, and paths.
+
+### First-run usability
+- Add a three-step Start Here path: choose a project -> inspect what survived -> preserve useful context.
+- Make Projects the primary navigation path.
+- Keep Resume, Fork, readable transcript, and Context Capsule actions available at session level.
+
+### Safety
+- Vendor JSONL remains read-only.
+- Dashboard remains localhost-only by default.
+- Durable-memory writes still require an explicit target, confirmation, and backup.
+
+## 0.1.0
+
+- Initial Memory Intelligence Control Plane.
+- Claude Code session inventory and subagent distinction.
+- Durable memory/instruction discovery.
+- Context-loss candidates, conservative conflicts, stale-memory signals, and preservation coverage.
+- Resume/Fork command generation and deterministic Context Capsule export.
+- Guarded CLI promotion with backup.
 
 ## 0.1.0-alpha.1
 
