@@ -1,27 +1,64 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07111b"/><stop offset="1" stop-color="#03070b"/></linearGradient>
-    <linearGradient id="meter" x1="0" x2="1"><stop stop-color="#5a9cff"/><stop offset="1" stop-color="#55e6dc"/></linearGradient>
-    <style>.t{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#dbe7f5}.m{fill:#7890a5}.b{fill:#a9c9ff}.c{fill:#55e6dc}.g{fill:#69e39c}.a{fill:#f2c66d}.r{fill:#ff7c84}.p{fill:#081018;stroke:#173044}.s{font-size:12px}.xs{font-size:10px}.h{font-size:18px;font-weight:700}.k{font-size:28px;font-weight:700}</style>
-  </defs>
-  <rect width="1400" height="760" fill="url(#bg)"/>
-  <rect x="0" y="0" width="205" height="760" fill="#050b11" stroke="#173044"/>
-  <text class="t b h" x="22" y="38">◉ AgentMemora</text><text class="t m xs" x="22" y="57">MEMORY INTELLIGENCE CONSOLE</text>
-  <g class="t s"><text x="24" y="112" class="b">⌁  Overview</text><text x="24" y="151" class="m">⚠  Context Risks</text><text x="24" y="190" class="m">▣  Sessions</text><text x="24" y="229" class="m">◉  Memory Sources</text><text x="24" y="268" class="m">≠  Conflicts</text><text x="24" y="307" class="m">⌁  Telemetry</text></g>
-  <circle cx="25" cy="691" r="4" fill="#69e39c"/><text class="t g xs" x="37" y="695">LOCAL CONTROL PLANE</text><text class="t m xs" x="22" y="718">read-only vendor logs · no telemetry</text>
-  <line x1="205" y1="76" x2="1400" y2="76" stroke="#173044"/><text class="t s" x="232" y="34">LOCAL AGENT MEMORY &amp; CONTEXT CONTROL PLANE</text><text class="t m xs" x="232" y="53">Inspect what agents know · preserve important context · transfer it safely</text><text class="t g xs" x="1190" y="43">● SCAN COMPLETE</text>
-  <text class="t h" x="232" y="112">MEMORY POSTURE</text>
-  <g transform="translate(232 132)">
-    <g><rect class="p" width="210" height="105" rx="6"/><text class="t c s" x="16" y="25">◉ MEMORY FILES</text><text class="t k" x="16" y="65">14</text><text class="t m xs" x="16" y="86">durable sources</text></g>
-    <g transform="translate(222)"><rect class="p" width="210" height="105" rx="6"/><text class="t c s" x="16" y="25">◆ CANDIDATES</text><text class="t k" x="16" y="65">27</text><text class="t m xs" x="16" y="86">from session context</text></g>
-    <g transform="translate(444)"><rect class="p" width="210" height="105" rx="6"/><text class="t r s" x="16" y="25">! CONTEXT LOSS</text><text class="t r k" x="16" y="65">9</text><text class="t m xs" x="16" y="86">not durable yet</text></g>
-    <g transform="translate(666)"><rect class="p" width="210" height="105" rx="6"/><text class="t r s" x="16" y="25">≠ CONFLICTS</text><text class="t r k" x="16" y="65">3</text><text class="t m xs" x="16" y="86">review required</text></g>
-    <g transform="translate(888)"><rect class="p" width="210" height="105" rx="6"/><text class="t a s" x="16" y="25">◷ STALE 90D+</text><text class="t a k" x="16" y="65">2</text><text class="t m xs" x="16" y="86">memory review</text></g>
-  </g>
-  <rect class="p" x="232" y="257" width="718" height="128" rx="6"/><text class="t s" x="250" y="284">CONTEXT PRESERVATION COVERAGE</text><rect x="250" y="307" width="660" height="10" rx="3" fill="#0d1a24"/><rect x="250" y="307" width="535" height="10" rx="3" fill="url(#meter)"/><text class="t c h" x="848" y="349">81%</text><text class="t m xs" x="250" y="343">18 / 27 detected session candidates appear in durable context</text><text class="t m xs" x="250" y="367">JSONL remains read-only · promote reviewed facts with backup · export selected context as capsules</text>
-  <rect class="p" x="964" y="257" width="334" height="128" rx="6"/><text class="t s" x="982" y="284">SURVIVABILITY</text><text class="t m xs" x="982" y="311">conversation only</text><text class="t r xs" x="1230" y="311">AT RISK</text><text class="t m xs" x="982" y="335">auto memory</text><text class="t g xs" x="1230" y="335">SESSION ✓</text><text class="t m xs" x="982" y="359">context capsule</text><text class="t c xs" x="1230" y="359">PORTABLE</text>
-  <text class="t h" x="232" y="425">INTELLIGENCE ALERTS // CONTEXT LOSS</text>
-  <rect class="p" x="232" y="442" width="1066" height="105" rx="6"/><rect x="250" y="460" width="25" height="25" rx="4" fill="#1b160a" stroke="#5b4b22"/><text class="t a s" x="259" y="478">!</text><text class="t s" x="292" y="469">“We always use pnpm instead of npm for this project.”</text><text class="t m xs" x="292" y="490">Session-only candidate · 3 sessions · not found in durable memory/instructions</text><line x1="250" y1="506" x2="1280" y2="506" stroke="#102536"/><text class="t r s" x="257" y="530">≠</text><text class="t s" x="292" y="530">Database</text><text class="t m xs" x="440" y="530">PostgreSQL  ↔  MongoDB · 2 durable sources</text>
-  <text class="t h" x="232" y="589">CONTEXT SESSIONS</text>
-  <rect class="p" x="232" y="606" width="1066" height="112" rx="6"/><rect x="250" y="623" width="32" height="32" rx="4" fill="#07151a" stroke="#245c7d"/><text class="t c s" x="260" y="644">▣</text><text class="t b xs" x="298" y="625">CLAUDE CODE // SESSION</text><text class="t h" x="298" y="650">RIVA architecture and context intelligence</text><text class="t m xs" x="298" y="670">27 prompts · 93 tools · 1h 24m · 4 context-loss risks</text><rect x="873" y="629" width="96" height="27" rx="4" fill="#09141e" stroke="#24435c"/><text class="t xs" x="892" y="647">▶ RESUME</text><rect x="978" y="629" width="84" height="27" rx="4" fill="#09141e" stroke="#24435c"/><text class="t xs" x="998" y="647">⑂ FORK</text><rect x="1071" y="629" width="207" height="27" rx="4" fill="#071a18" stroke="#29695f"/><text class="t c xs" x="1095" y="647">⇢ CONTEXT CAPSULE</text><text class="t m xs" x="250" y="700">INSPECT  →  CURATE  →  PRESERVE  →  TRANSFER</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820">
+<defs>
+  <linearGradient id="hero" x1="0" x2="1"><stop stop-color="#eef5ff"/><stop offset=".55" stop-color="#fbfdff"/><stop offset="1" stop-color="#edf5ff"/></linearGradient>
+  <linearGradient id="blue" x1="0" x2="1"><stop stop-color="#2f6df6"/><stop offset="1" stop-color="#6aa5ff"/></linearGradient>
+  <style>
+    .t{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#14213d}
+    .m{fill:#6c7c96}.b{fill:#2f6df6}.g{fill:#19a974}.p{fill:#7657e8}.r{fill:#ef5261}.a{fill:#f0a43c}
+    .card{fill:#fff;stroke:#dfe7f2}.soft{fill:#f7f9fd;stroke:#e4ebf4}.s{font-size:12px}.xs{font-size:10px}.h{font-size:20px;font-weight:700}.heroH{font-size:31px;font-weight:800}.k{font-size:27px;font-weight:800}.bold{font-weight:700}
+  </style>
+</defs>
+<rect width="1400" height="820" fill="#f5f8fc"/>
+<rect width="1400" height="64" fill="#fff" stroke="#dfe7f2"/>
+<rect x="24" y="17" width="30" height="30" rx="9" fill="url(#blue)"/><rect x="33" y="26" width="12" height="12" rx="3" fill="none" stroke="#fff" stroke-width="2" transform="rotate(45 39 32)"/>
+<text class="t h" x="66" y="33">AgentMemora</text><text class="t m xs" x="66" y="49">MEMORY &amp; CONTEXT CONTROL PLANE</text>
+<g class="t s"><text class="b bold" x="285" y="37">Overview</text><text class="m" x="365" y="37">Sessions</text><text class="m" x="438" y="37">Subagents</text><text class="m" x="522" y="37">Memory</text><text class="m" x="590" y="37">Insights</text><text class="m" x="657" y="37">Tools</text></g>
+<rect x="940" y="16" width="280" height="34" rx="9" fill="#f9fbfe" stroke="#dfe7f2"/><text class="t m xs" x="958" y="37">⌕  Search memories, sessions, tools...</text><circle cx="1253" cy="32" r="5" fill="#22bf84"/><text class="t xs bold" x="1266" y="36">Local · Read-only</text>
+
+<rect x="24" y="82" width="1352" height="182" rx="16" fill="url(#hero)" stroke="#d8e4f4"/>
+<text class="t m xs bold" x="58" y="112">MEMORY &amp; CONTEXT CONTROL PLANE</text>
+<text class="t heroH" x="58" y="151">Turn agent conversations into</text><text class="t b heroH" x="58" y="187">lasting knowledge.</text>
+<text class="t m s" x="58" y="215">Inspect what your coding agents know, preserve important context, and move only what matters.</text>
+<rect x="58" y="229" width="112" height="28" rx="7" fill="#2f6df6"/><text x="78" y="248" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#fff">◉ View Memory</text>
+<rect x="180" y="229" width="120" height="28" rx="7" fill="#fff" stroke="#d7e2ef"/><text class="t xs bold" x="199" y="248">▣ Inspect Sessions</text>
+<rect x="1020" y="102" width="320" height="142" rx="13" fill="#ffffffcc" stroke="#cbdcf1"/>
+<text x="1040" y="128" font-family="ui-monospace,monospace" font-size="11" fill="#2f6df6">› context.scan <tspan fill="#14213d">complete</tspan></text>
+<text x="1040" y="150" font-family="ui-monospace,monospace" font-size="11" fill="#2f6df6">› durable.memory <tspan fill="#14213d">47 sources</tspan></text>
+<text x="1040" y="172" font-family="ui-monospace,monospace" font-size="11" fill="#2f6df6">› session.history <tspan fill="#14213d">21 primary</tspan></text>
+<text x="1040" y="194" font-family="ui-monospace,monospace" font-size="11" fill="#7657e8">› subagent.history <tspan fill="#14213d">8 traces</tspan></text>
+<text class="t bold s" x="1040" y="222">81% preserved</text><text class="t r bold s" x="1160" y="222">9 at risk</text><text class="t m s" x="1250" y="222">13 projects</text>
+
+<g transform="translate(24 278)">
+  <g><rect class="card" width="210" height="96" rx="12"/><text class="t g s bold" x="15" y="25">▤  MEMORY FILES</text><text class="t k" x="15" y="61">47</text><text class="t m xs" x="15" y="80">durable sources detected</text></g>
+  <g transform="translate(220)"><rect class="card" width="210" height="96" rx="12"/><text class="t b s bold" x="15" y="25">▣  SESSIONS</text><text class="t k" x="15" y="61">21</text><text class="t m xs" x="15" y="80">primary histories</text></g>
+  <g transform="translate(440)"><rect class="card" width="210" height="96" rx="12"/><text class="t p s bold" x="15" y="25">◇  SUBAGENTS</text><text class="t k" x="15" y="61">8</text><text class="t m xs" x="15" y="80">transcripts indexed</text></g>
+  <g transform="translate(660)"><rect class="card" width="210" height="96" rx="12"/><text class="t b s bold" x="15" y="25">□  PROJECTS</text><text class="t k" x="15" y="61">13</text><text class="t m xs" x="15" y="80">contexts mapped</text></g>
+  <g transform="translate(880)"><rect class="card" width="210" height="96" rx="12"/><text class="t r s bold" x="15" y="25">!  AT RISK</text><text class="t k" x="15" y="61">9</text><text class="t m xs" x="15" y="80">session-only candidates</text></g>
+  <g transform="translate(1100)"><rect class="card" width="228" height="96" rx="12"/><text class="t a s bold" x="15" y="25">≠  CONFLICTS</text><text class="t k" x="15" y="61">3</text><text class="t m xs" x="15" y="80">review signals</text></g>
+</g>
+
+<rect class="card" x="24" y="390" width="360" height="150" rx="12"/><text class="t s bold" x="42" y="416">Context Coverage</text>
+<circle cx="110" cy="468" r="45" fill="none" stroke="#dfeaff" stroke-width="15"/><circle cx="110" cy="468" r="45" fill="none" stroke="#19a974" stroke-width="15" stroke-dasharray="229 283" transform="rotate(-90 110 468)"/><text class="t h" x="90" y="474">81%</text><text class="t m xs" x="82" y="492">preserved</text>
+<circle cx="190" cy="447" r="4" fill="#19a974"/><text class="t xs" x="202" y="451">Durable memory</text><circle cx="190" cy="470" r="4" fill="#65a7ff"/><text class="t xs" x="202" y="474">Session only</text><circle cx="190" cy="493" r="4" fill="#f0a43c"/><text class="t xs" x="202" y="497">At-risk candidates</text>
+
+<rect class="card" x="396" y="390" width="610" height="150" rx="12"/><text class="t s bold" x="414" y="416">Agent Activity Snapshot</text>
+<line x1="420" y1="505" x2="980" y2="505" stroke="#e6edf6"/><line x1="420" y1="460" x2="980" y2="460" stroke="#e6edf6" stroke-dasharray="3 4"/>
+<g fill="#5c91f7"><rect x="430" y="478" width="22" height="27" rx="4"/><rect x="462" y="455" width="22" height="50" rx="4"/><rect x="494" y="468" width="22" height="37" rx="4"/><rect x="526" y="435" width="22" height="70" rx="4"/><rect x="558" y="463" width="22" height="42" rx="4"/></g>
+<g fill="#8c72ea"><rect x="590" y="447" width="22" height="58" rx="4"/><rect x="622" y="475" width="22" height="30" rx="4"/><rect x="654" y="425" width="22" height="80" rx="4"/><rect x="686" y="457" width="22" height="48" rx="4"/></g>
+<g fill="#5c91f7"><rect x="718" y="440" width="22" height="65" rx="4"/><rect x="750" y="466" width="22" height="39" rx="4"/><rect x="782" y="418" width="22" height="87" rx="4"/><rect x="814" y="451" width="22" height="54" rx="4"/><rect x="846" y="470" width="22" height="35" rx="4"/></g>
+<text class="t m xs" x="420" y="526">recent primary + subagent context activity</text>
+
+<rect class="card" x="1018" y="390" width="358" height="150" rx="12"/><text class="t s bold" x="1036" y="416">Top Tools</text>
+<g class="t xs"><text x="1038" y="443">⌘ Bash</text><text x="1038" y="467">✎ Edit</text><text x="1038" y="491">◫ Read</text><text x="1038" y="515">▣ Write</text></g>
+<g fill="#edf1f7"><rect x="1105" y="434" width="205" height="8" rx="4"/><rect x="1105" y="458" width="205" height="8" rx="4"/><rect x="1105" y="482" width="205" height="8" rx="4"/><rect x="1105" y="506" width="205" height="8" rx="4"/></g>
+<g fill="#2f6df6"><rect x="1105" y="434" width="180" height="8" rx="4"/><rect x="1105" y="458" width="80" height="8" rx="4"/><rect x="1105" y="482" width="55" height="8" rx="4"/><rect x="1105" y="506" width="30" height="8" rx="4"/></g>
+
+<text class="t h" x="24" y="577">Memory Workspace</text><text class="t m xs" x="190" y="577">files, readable content and subagent context</text>
+<rect class="card" x="24" y="594" width="390" height="202" rx="12"/><text class="t s bold" x="42" y="620">Memory Files</text>
+<g class="t xs"><rect x="42" y="636" width="354" height="35" rx="7" fill="#f2f7ff"/><text class="g" x="55" y="658">▤</text><text class="bold" x="78" y="653">MEMORY.md</text><text class="m" x="78" y="665">~/.claude/projects/riva/memory/</text><text x="42" y="697">▤   architecture.md</text><text class="m" x="42" y="721">▤   decisions.md</text><text class="m" x="42" y="745">▤   preferences.md</text><text class="m" x="42" y="769">▤   tech-stack.md</text></g>
+<rect class="card" x="426" y="594" width="550" height="202" rx="12"/><text class="t s bold" x="444" y="620">Memory Preview</text><text class="t g xs bold" x="444" y="646">▤ MEMORY.md</text><text class="t m xs" x="444" y="661">~/.claude/projects/riva/memory/</text>
+<rect class="soft" x="444" y="675" width="514" height="104" rx="8"/><text x="460" y="696" font-family="ui-monospace,monospace" font-size="10" fill="#2f6df6"># RIVA - Project Memory</text><text x="460" y="716" font-family="ui-monospace,monospace" font-size="10" fill="#22334d">## Key Decisions</text><text x="460" y="735" font-family="ui-monospace,monospace" font-size="10" fill="#22334d">- Use Qwen3-Coder for code generation</text><text x="460" y="754" font-family="ui-monospace,monospace" font-size="10" fill="#22334d">- Single project scope</text>
+<rect class="card" x="988" y="594" width="388" height="202" rx="12"/><text class="t s bold" x="1006" y="620">Subagent Conversations</text>
+<rect class="soft" x="1006" y="638" width="352" height="62" rx="8"/><text class="t p xs bold" x="1020" y="658">◇ code-reviewer</text><text class="t m xs" x="1020" y="678">Found 3 issues in the authentication flow...</text>
+<rect class="soft" x="1006" y="710" width="352" height="62" rx="8"/><text class="t p xs bold" x="1020" y="730">◇ architecture-analyst</text><text class="t m xs" x="1020" y="750">Context layer should remain the core product...</text>
 </svg>
