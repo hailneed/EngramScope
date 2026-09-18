@@ -11,12 +11,38 @@
   },
   "scripts": {
     "start": "node ./bin/agentmemora.js",
-    "test:node": "node --test test-node/*.test.js"
+    "test:node": "node --test test-node/*.test.js",
+    "prepublishOnly": "npm run test:node && node ./bin/agentmemora.js doctor"
   },
-  "keywords": ["ai", "agents", "memory", "context", "claude-code", "codex", "cursor", "copilot", "devtools", "local-first"],
+  "keywords": [
+    "ai",
+    "agents",
+    "memory",
+    "context",
+    "claude-code",
+    "codex",
+    "cursor",
+    "copilot",
+    "devtools",
+    "local-first"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hailneed/agentmemora.git"
+  },
+  "author": "Halil Atasoy",
+  "homepage": "https://github.com/hailneed/agentmemora#readme",
+  "bugs": {
+    "url": "https://github.com/hailneed/agentmemora/issues"
+  },
+  "files": [
+    "bin/",
+    "src-node/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }
