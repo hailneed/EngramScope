@@ -1,6 +1,6 @@
 {
   "name": "agentmemora",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0",
   "description": "Local-first memory and context control plane for AI coding agents.",
   "type": "module",
   "bin": {
