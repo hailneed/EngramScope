@@ -40,7 +40,8 @@
     "bin/",
     "src-node/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "publishConfig": {
     "access": "public"
