@@ -25,3 +25,4 @@ jobs:
           node-version: "20"
       - run: npm run test:node
       - run: node ./bin/agentmemora.js doctor
+      - run: npm pack --dry-run
