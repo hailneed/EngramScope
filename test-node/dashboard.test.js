@@ -74,6 +74,9 @@ test('dashboard renders the intelligence terminal memory workspace', () => {
   assert.match(html, /Subagent Comms/);
   assert.match(html, /Review memory conflicts/);
   assert.match(html, /Context Coverage/);
-  assert.match(html, /Local · Read-only/);\n  assert.match(html, /class=\"intel-strip\"/);\n  assert.match(html, /OPERATIONAL MEMORY INTELLIGENCE/);\n  assert.match(html, /WRITE GUARD/);
+  assert.match(html, /Local · Read-only/);
+  assert.match(html, /class="intel-strip"/);
+  assert.match(html, /OPERATIONAL MEMORY INTELLIGENCE/);
+  assert.match(html, /WRITE GUARD/);
   assert.match(html, /selectMemory/);
 });
